@@ -15,7 +15,8 @@ public class RedditPostDeserializer implements JsonDeserializer<RedditPost> {
                 postObject.get("title").getAsString(),
                 postObject.get("thumbnail").getAsString(),
                 postObject.get("url").getAsString(),
-                "https://www.reddit.com" + postObject.get("permalink").getAsString()
+                "https://www.reddit.com" + postObject.get("permalink").getAsString(),
+                postObject.get("score").getAsInt()
         );
     }
 }
