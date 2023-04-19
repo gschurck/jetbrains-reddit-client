@@ -219,6 +219,7 @@ public class RedditClient extends JFrame implements ListSelectionListener {
 
             System.out.println(redditPostsList);
             for (RedditPost post : redditPostsList) {
+                System.out.println(post.getTitle());
                 postListModel.addElement(post);
             }
             System.out.println("Ending thread...");
