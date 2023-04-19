@@ -14,51 +14,57 @@ public class RedditPostRenderer extends JLabel implements ListCellRenderer<Reddi
                                                   boolean isSelected, boolean cellHasFocus) {
 //        super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         RedditPostPanel panel = new RedditPostPanel(redditPost);
-        // add jlabel to panel
-
-        // Set the text and icon of the list cell
-//        setText(redditPost.getTitle());
+//        JPanel wrapper = new JPanel(new BorderLayout());
+        // minimal dimensions
+//        wrapper.add(panel, BorderLayout.CENTER);
+        panel.add(this);
+        setText(redditPost.getTitle());
         String thumbnail = redditPost.getThumbnail();
+
         thumbnail = !Objects.equals(thumbnail, "nsfw") ? thumbnail : "https://img.freepik.com/premium-vector/nsfw-sign-safe-work-censorship-vector-stock-illustration_100456-8356.jpg?w=150";
         try {
-            setIcon(new ImageIcon(new URL(thumbnail)));
+            ImageIcon imageIcon = new ImageIcon(new URL(thumbnail));
+            if (imageIcon.getImageLoadStatus() == 4) { // if image is not loaded increase size
+//                setPreferredSize(new Dimension(100, 100));
+                panel.setPreferredSize(new Dimension(100, 100));
+            } else {
+                panel.setPreferredSize(new Dimension(100, 150));
+            }
+            setIcon(imageIcon);
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
         ;
         setHorizontalTextPosition(JLabel.RIGHT);
-        // Set the tool tip text of the list cell to the post URL
         setToolTipText(redditPost.getUrl());
 
         Color backgroundColor = RedditClient.getHoveredJListIndex() == index ? new Color(209, 226, 228) : Color.WHITE;
+        this.setBackground(backgroundColor);
         panel.setBackground(backgroundColor);
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new GridLayout(1, 2, 5, 0));
+        if (isSelected) {
+            panel.showButtons();
+        } else {
+            panel.hideButtons();
+        }
+        panel.getLinkButton().addActionListener(e -> System.out.println("Open Link"));
+        panel.getCommentsButton().addActionListener(e -> System.out.println("Open Comments"));
 
-        // Create the first button
-        JButton openButton = new JButton("Open");
-        openButton.addActionListener(e -> {
-            try {
-                Desktop.getDesktop().browse(new URL(redditPost.getUrl()).toURI());
-            } catch (Exception exception) {
-                exception.printStackTrace();
-            }
-        });
-        buttonPanel.add(openButton, BorderLayout.CENTER);
-
-        // Create the second button
-        JButton saveButton = new JButton("Save");
-        saveButton.addActionListener(e -> {
-            // Add your code to save the post here
-            System.out.println("Saving post: " + redditPost.getTitle());
-        });
-        buttonPanel.add(saveButton, BorderLayout.EAST);
-        add(buttonPanel);
-
-        panel.add(this);
+//        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+//        JButton test = new JButton("Test");
+//        buttonPanel.add(test);
+//        wrapper.add(buttonPanel, BorderLayout.NORTH);
+//        buttonPanel.setBackground(backgroundColor);
+//        test.addActionListener(e -> System.out.println("Test"));
         return panel;
 //        return this;
     }
 
+    private void openUrl(String url) {
+        try {
+            Desktop.getDesktop().browse(new URL(url).toURI());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 }

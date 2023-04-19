@@ -110,14 +110,14 @@ public class RedditClient extends JFrame implements ListSelectionListener {
         addListeners();
 
         // Load the posts
-        loadPosts(10, null);
+        loadPosts(3, null);
     }
 
     private void addListeners() {
         postList.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent me) {
-                System.out.println(me);
+//                System.out.println(me);
 //                int index = postList.locationToIndex(me.getPoint());
                 Point p = new Point(me.getX(), me.getY());
                 int index = postList.locationToIndex(p);
@@ -125,25 +125,21 @@ public class RedditClient extends JFrame implements ListSelectionListener {
                     hoveredJListIndex = index;
                     postList.repaint();
                 }
-                postList.setSelectionBackground(Color.YELLOW);
-                postList.setSelectionForeground(Color.BLACK);
             }
         });
 
-        postList.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent me) {
-                System.out.println(me);
-                Point p = new Point(me.getX(), me.getY());
-                int index = postList.locationToIndex(p);
-                if (index != hoveredJListIndex) {
-                    hoveredJListIndex = index;
-                    postList.repaint();
-                }
-                postList.setSelectionBackground(Color.YELLOW);
-                postList.setSelectionForeground(Color.BLACK);
-            }
-        });
+//        postList.addMouseListener(new MouseAdapter() {
+//            @Override
+//            public void mousePressed(MouseEvent me) {
+//                System.out.println(me);
+//                Point p = new Point(me.getX(), me.getY());
+//                int index = postList.locationToIndex(p);
+//                if (index != hoveredJListIndex) {
+//                    hoveredJListIndex = index;
+//                    postList.repaint();
+//                }
+//            }
+//        });
 
         verticalScrollBar.addAdjustmentListener(new AdjustmentListener() {
             @Override
@@ -159,7 +155,7 @@ public class RedditClient extends JFrame implements ListSelectionListener {
 
                         RedditPost afterRedditPost = postListModel.lastElement();
                         System.out.println(afterRedditPost);
-                        loadPosts(10, afterRedditPost);
+                        loadPosts(3, afterRedditPost);
                     }
 
                 }
@@ -203,7 +199,7 @@ public class RedditClient extends JFrame implements ListSelectionListener {
             ArrayList<RedditPost> redditPostsList = new ArrayList<>();
             java.lang.reflect.Type listType = new TypeToken<List<RedditPost>>() {
             }.getType();
-            String urlParameters = buildURLParams(10, afterRedditPost);
+            String urlParameters = buildURLParams(limit, afterRedditPost);
             Gson gson = new Gson();
             Gson gsonRedditPost = new GsonBuilder().registerTypeAdapter(RedditPost.class, new RedditPostDeserializer()).create();
 
