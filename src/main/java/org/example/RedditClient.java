@@ -12,8 +12,6 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -23,8 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RedditClient extends JFrame implements ListSelectionListener {
-    private JList<RedditPost> postList;
-    private DefaultListModel<RedditPost> postListModel;
+    private ArrayList<RedditPost> redditPosts;
+    private JPanel basePanel;
     private JLabel spinner;
     private JButton linkButton;
     private JButton commentsButton;
@@ -33,18 +31,21 @@ public class RedditClient extends JFrame implements ListSelectionListener {
     private RedditPost selectedPost;
 
     private JScrollBar verticalScrollBar;
-    private static int hoveredJListIndex = -1;
+    private static RedditPostPanel selectedPanel = null;
 
     public RedditClient() {
         super("Reddit Client");
+        redditPosts = new ArrayList<>();
+        basePanel = new JPanel();
+        basePanel.setLayout(new BoxLayout(basePanel, BoxLayout.Y_AXIS));
 
         // Initialize the UI components
-        postListModel = new DefaultListModel<>();
-        postList = new JList<>(postListModel);
-        postList.setModel(postListModel);
-        postList.setCellRenderer(new RedditPostRenderer());
-        postList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        postList.addListSelectionListener(this);
+//        postListModel = new DefaultListModel<>();
+//        postList = new JList<>(postListModel);
+//        postList.setModel(postListModel);
+//        postList.setCellRenderer(new RedditPostRenderer());
+//        postList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+//        postList.addListSelectionListener(this);
 
         try {
             spinner = new JLabel(new ImageIcon(new URL("https://media.tenor.com/wpSo-8CrXqUAAAAi/loading-loading-forever.gif")));
@@ -84,9 +85,10 @@ public class RedditClient extends JFrame implements ListSelectionListener {
 //        add(loadingPanel, BorderLayout.SOUTH);
 
         setLayout(new BorderLayout());
-        JScrollPane scrollPane = new JScrollPane(postList);
+        JScrollPane scrollPane = new JScrollPane(basePanel);
 //        scrollPane.setPreferredSize(new Dimension(800, 600));
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
         verticalScrollBar = scrollPane.getVerticalScrollBar();
 
@@ -114,19 +116,19 @@ public class RedditClient extends JFrame implements ListSelectionListener {
     }
 
     private void addListeners() {
-        postList.addMouseMotionListener(new MouseAdapter() {
-            @Override
-            public void mouseMoved(MouseEvent me) {
+//        basePanel.addMouseMotionListener(new MouseAdapter() {
+//            @Override
+//            public void mouseMoved(MouseEvent me) {
 //                System.out.println(me);
-//                int index = postList.locationToIndex(me.getPoint());
-                Point p = new Point(me.getX(), me.getY());
-                int index = postList.locationToIndex(p);
-                if (index != hoveredJListIndex) {
-                    hoveredJListIndex = index;
-                    postList.repaint();
-                }
-            }
-        });
+////                int index = postList.locationToIndex(me.getPoint());
+//                Point p = new Point(me.getX(), me.getY());
+//                int index = basePanel.locationToIndex(p);
+//                if (index != hoveredJListIndex) {
+//                    hoveredJListIndex = index;
+//                    postList.repaint();
+//                }
+//            }
+//        });
 
 //        postList.addMouseListener(new MouseAdapter() {
 //            @Override
@@ -148,12 +150,12 @@ public class RedditClient extends JFrame implements ListSelectionListener {
                 if (scrollbarAtBottom && !spinner.isVisible()) {
                     System.out.println("Hit bottom of list");
 //                    postListModel.addElement(new RedditPost("Loading...", "test", "https://picsum.photos/200", "dfdf", "dfdf"));
-                    int postListModelSize = postListModel.size();
-                    System.out.println(postListModelSize);
-                    if (postListModelSize > 0) {
-                        System.out.println("reddit: " + postListModel.lastElement());
+                    int postsList = redditPosts.size();
+                    System.out.println(postsList);
+                    if (postsList > 0) {
+                        System.out.println("reddit: " + redditPosts.get(postsList - 1));
 
-                        RedditPost afterRedditPost = postListModel.lastElement();
+                        RedditPost afterRedditPost = redditPosts.get(postsList - 1);
                         System.out.println(afterRedditPost);
                         loadPosts(3, afterRedditPost);
                     }
@@ -163,12 +165,12 @@ public class RedditClient extends JFrame implements ListSelectionListener {
         });
     }
 
-    public static int getHoveredJListIndex() {
-        return hoveredJListIndex;
+    public static RedditPostPanel getSelectedPanel() {
+        return selectedPanel;
     }
 
-    public static int setHoveredJListIndex(int index) {
-        return hoveredJListIndex = index;
+    public static void setSelectedPanel(RedditPostPanel selectedPanel) {
+        RedditClient.selectedPanel = selectedPanel;
     }
 
     private String buildURLParams(int limit, RedditPost afterRedditPost) {
@@ -216,7 +218,8 @@ public class RedditClient extends JFrame implements ListSelectionListener {
             System.out.println(redditPostsList);
             for (RedditPost post : redditPostsList) {
                 System.out.println(post.getTitle());
-                postListModel.addElement(post);
+                redditPosts.add(post);
+                basePanel.add(new RedditPostPanel(post));
             }
             System.out.println("Ending thread...");
             spinner.setVisible(false);
@@ -225,39 +228,39 @@ public class RedditClient extends JFrame implements ListSelectionListener {
 
     @Override
     public void valueChanged(ListSelectionEvent e) {
-        System.out.println("valueChanged");
-        System.out.println(e);
-        if (!e.getValueIsAdjusting()) {
-            // Get the selected post
-            selectedPost = postList.getSelectedValue();
-            if (selectedPost != null) {
-                // Show the spinner while the thumbnail is loading
-                thumbnailLabel.setIcon(thumbnailPlaceholder);
-                spinner.setVisible(true);
-
-                // Load the thumbnail in a background thread
-                new Thread(() -> {
-                    try {
-                        ImageIcon thumbnailIcon = new ImageIcon(new URL(selectedPost.getThumbnail()));
-                        SwingUtilities.invokeLater(() -> {
-                            thumbnailLabel.setIcon(thumbnailIcon);
-                            spinner.setVisible(false);
-                        });
-                    } catch (MalformedURLException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                }).start();
-
-                // Update the buttons visibility
-                linkButton.setVisible(true);
-                commentsButton.setVisible(true);
-            } else {
-                // No post selected, hide the buttons
-                linkButton.setVisible(false);
-                commentsButton.setVisible(false);
-                thumbnailLabel.setIcon(thumbnailPlaceholder);
-            }
-        }
+//        System.out.println("valueChanged");
+//        System.out.println(e);
+//        if (!e.getValueIsAdjusting()) {
+//            // Get the selected post
+//            selectedPost = postList.getSelectedValue();
+//            if (selectedPost != null) {
+//                // Show the spinner while the thumbnail is loading
+//                thumbnailLabel.setIcon(thumbnailPlaceholder);
+//                spinner.setVisible(true);
+//
+//                // Load the thumbnail in a background thread
+//                new Thread(() -> {
+//                    try {
+//                        ImageIcon thumbnailIcon = new ImageIcon(new URL(selectedPost.getThumbnail()));
+//                        SwingUtilities.invokeLater(() -> {
+//                            thumbnailLabel.setIcon(thumbnailIcon);
+//                            spinner.setVisible(false);
+//                        });
+//                    } catch (MalformedURLException ex) {
+//                        throw new RuntimeException(ex);
+//                    }
+//                }).start();
+//
+//                // Update the buttons visibility
+//                linkButton.setVisible(true);
+//                commentsButton.setVisible(true);
+//            } else {
+//                // No post selected, hide the buttons
+//                linkButton.setVisible(false);
+//                commentsButton.setVisible(false);
+//                thumbnailLabel.setIcon(thumbnailPlaceholder);
+//            }
+//        }
     }
 
 
