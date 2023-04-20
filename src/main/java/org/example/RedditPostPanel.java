@@ -18,6 +18,10 @@ public class RedditPostPanel extends JPanel {
 
     ImageIcon imageIcon;
 
+    ImagePanel image;
+
+    JLabel titleLabel;
+
     private static final Color SELECTED_BACKGROUND_COLOR = new Color(209, 226, 228);
 
 
@@ -26,8 +30,7 @@ public class RedditPostPanel extends JPanel {
         this.post = post;
         postHeader = new JPanel(new BorderLayout());
 
-
-        JLabel titleLabel = new JLabel(post.title());
+        titleLabel = new JLabel(post.title());
         titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         titleLabel.setForeground(Color.BLUE);
         postHeader.add(titleLabel, BorderLayout.CENTER);
@@ -37,27 +40,7 @@ public class RedditPostPanel extends JPanel {
         votes.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
         postHeader.add(votes, BorderLayout.EAST);
 
-
-        String thumbnail = post.thumbnail();
-
-        // handle nsfw images
-        thumbnail = !Objects.equals(thumbnail, "nsfw") ? thumbnail : "https://img.freepik.com/premium-vector/nsfw-sign-safe-work-censorship-vector-stock-illustration_100456-8356.jpg?w=150";
-        try {
-            imageIcon = new ImageIcon(new URL(thumbnail));
-            setBaseHeight();
-            ImagePanel image = new ImagePanel(imageIcon);
-            image.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 10));
-            postHeader.add(image, BorderLayout.WEST);
-            if (imageLoaded()) {
-                image.setVisible(true);
-                titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
-            } else {
-                image.setVisible(false);
-                titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 160, 0, 0));
-            }
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
+        loadImage();
 
         buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
@@ -80,6 +63,40 @@ public class RedditPostPanel extends JPanel {
         setBackgroundAllChilds(Color.WHITE);
         addListeners();
         add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    private void loadImage() {
+        String thumbnail = post.thumbnail();
+
+        // handle nsfw images
+        thumbnail = !Objects.equals(thumbnail, "nsfw") ? thumbnail : "https://img.freepik.com/premium-vector/nsfw-sign-safe-work-censorship-vector-stock-illustration_100456-8356.jpg?w=150";
+
+        // load image
+        try {
+            imageIcon = new ImageIcon(new URL(thumbnail));
+            setBaseHeight();
+            image = new ImagePanel(imageIcon);
+
+            if (!imageLoaded()) {
+                imageIcon = new ImageIcon("src/main/resources/video-player.png");
+                Image image_temp = imageIcon.getImage();
+                Image newimg = image_temp.getScaledInstance(140, 140, java.awt.Image.SCALE_SMOOTH);
+                setBaseHeight();
+                imageIcon = new ImageIcon(newimg);
+                image = new ImagePanel(imageIcon);
+                System.out.println("Image not loaded");
+                System.out.println(imageLoaded());
+            }
+
+            image.setVisible(true);
+            titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
+            image.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 10));
+            postHeader.add(image, BorderLayout.WEST);
+
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     private void addListeners() {
@@ -117,6 +134,7 @@ public class RedditPostPanel extends JPanel {
         this.setBackground(color);
         postHeader.setBackground(color);
         buttonPanel.setBackground(color);
+        image.setBackground(color);
     }
 
     private void openUrl(String url) {
