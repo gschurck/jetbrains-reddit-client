@@ -127,6 +127,7 @@ public class RedditClient extends JFrame implements ListSelectionListener {
         System.out.println("https://www.reddit.com/r/aww/hot.json" + urlParameters);
         URL jsonUrl = new URL("https://www.reddit.com/r/aww/hot.json" + urlParameters);
         URLConnection connection = jsonUrl.openConnection();
+        // fake a user agent to avoid 429 errors from Reddit
         connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36");
         return new InputStreamReader(connection.getInputStream());
     }
@@ -167,7 +168,6 @@ public class RedditClient extends JFrame implements ListSelectionListener {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new RedditClient().setVisible(true));
-        ;
     }
 }
 
