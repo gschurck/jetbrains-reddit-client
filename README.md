@@ -14,4 +14,4 @@ Built for JDK 17
 
 ## Screenshot
 
-![image](https://user-images.githubusercontent.com/21091232/233221550-e316dec8-168d-4d98-8a0c-537a9a7e8696.png)
+![image](https://user-images.githubusercontent.com/21091232/233230840-572a49a3-4b18-47a3-9c23-d49bbec28186.png)
