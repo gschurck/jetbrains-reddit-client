@@ -13,8 +13,6 @@ public class RedditPostPanel extends JPanel {
     private final RedditPost post;
 
     private final JPanel buttonPanel;
-    private final JButton linkButton;
-    private final JButton commentsButton;
 
     private final JPanel postHeader;
 
@@ -63,14 +61,14 @@ public class RedditPostPanel extends JPanel {
 
         buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
-        linkButton = new JButton("Link");
+        JButton linkButton = new JButton("Link");
         linkButton.setFont(new Font("Arial", Font.BOLD, 15));
         cleanButton(linkButton);
         linkButton.addActionListener(e -> openUrl(post.url()));
         buttonPanel.add(linkButton);
         linkButton.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
 
-        commentsButton = new JButton("Comments");
+        JButton commentsButton = new JButton("Comments");
         commentsButton.setFont(new Font("Arial", Font.BOLD, 15));
         cleanButton(commentsButton);
         commentsButton.addActionListener(e -> openUrl(post.permalink()));
