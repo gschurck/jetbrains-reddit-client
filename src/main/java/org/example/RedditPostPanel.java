@@ -142,7 +142,6 @@ public class RedditPostPanel extends JPanel {
     }
 
     private void unselectPost() {
-//        setBackgroundAllChilds(Color.WHITE);
         setBackgroundAllChilds(Color.WHITE);
         setBaseHeight();
         hideButtons();
